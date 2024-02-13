@@ -13,21 +13,53 @@
             display: block;
         }
 
-        #nameForm {
+        #passwordForm, #greetingForm {
             position: absolute;
             top: 20px;
             left: 20px;
+            z-index: 100;
+        }
+
+        #greetingForm {
+            display: none;
+        }
+
+        textarea {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-<div id="nameForm">
-    <input type="text" id="nameInput" placeholder="Namen hier eingeben"/>
-    <button onclick="addName()">Namen hinzufügen</button>
+<div id="passwordForm">
+    <input type="password" id="passwordInput" placeholder="Passwort"/>
+    <button onclick="checkPassword()">Einloggen</button>
+</div>
+
+<div id="greetingForm">
+    <textarea id="greetingText" placeholder="Grußtext hier verfassen" rows="4" cols="50"></textarea>
+    <button onclick="addGreeting()">Gruß hinzufügen</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.0.0/firebase-firestore.js"></script>
 <script>
+    // Web-App Firebase Konfiguration
+    const firebaseConfig = {
+        apiKey: "AIzaSyAd0lcLXWCidQNHdEloGnQWARC_DuvGcZU",
+        authDomain: "maximumbaby2024.firebaseapp.com",
+        projectId: "maximumbaby2024",
+        storageBucket: "maximumbaby2024.appspot.com",
+        messagingSenderId: "593893328494",
+        appId: "1:593893328494:web:ec51e0f9344c33307cc87f"
+    };
+
+    // Initialisiere Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Initialisiere Firestore
+    const db = firebase.firestore();
+
     // Grundlegendes Three.js-Setup
     var scene = new THREE.Scene();
     var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -37,65 +69,61 @@
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    // Hier können Sie einfache geometrische Formen oder Text als Willkommensbotschaft hinzufügen
-    // Herzform-Funktion
     function heartShape(u, v, target) {
         u = 2 * Math.PI * u - Math.PI;
         v = 2 * Math.PI * v - Math.PI;
 
         var x = 16 * Math.pow(Math.sin(u), 3);
-        var y = 13 * Math.cos(u) - 5 * Math.cos(2*u) - 2 * Math.cos(3*u) - Math.cos(4*u);
-        var z = -v;
+        var y = 13 * Math.cos(u) - 5 * Math.cos(2 * u) - 2 * Math.cos(3 * u) - Math.cos(4 * u);
+        var z = -0.1 * v;
 
-        target.set(x, y, z).multiplyScalar(0.2); // Skalieren, um die Größe des Herzens anzupassen
+        target.set(x, y, z).multiplyScalar(0.2);
     }
 
-    // Parametrische Geometrie basierend auf der Herzform
     var geometry = new THREE.ParametricGeometry(heartShape, 50, 50);
-
-    // Material
-    var material = new THREE.MeshBasicMaterial({ color: 0xFF1493, side: THREE.DoubleSide });
-
-    // Mesh erstellen
+    var material = new THREE.MeshBasicMaterial({color: 0xf54242, side: THREE.DoubleSide});
     var heart = new THREE.Mesh(geometry, material);
 
-    // Herz rotieren, um es aufrecht zu stellen
     heart.rotation.x = Math.PI;
-    heart.position.y = -2;
+    heart.position.y = 0;
 
-    // Herz zur Szene hinzufügen
     scene.add(heart);
 
-    // Animations-Loop
     function animate() {
         requestAnimationFrame(animate);
-        torusKnot.rotation.x += 0.01;
-        torusKnot.rotation.y += 0.01;
+        heart.rotation.x += 0.01;
+        heart.rotation.y += 0.01;
         renderer.render(scene, camera);
     }
 
     animate();
 
-    // Funktion zum Hinzufügen von Namen
-    function addName() {
-        var name = document.getElementById('nameInput').value;
-        if (name) {
-            var loader = new THREE.FontLoader();
-            loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-                var textGeometry = new THREE.TextGeometry(name, {
-                    font: font,
-                    size: 1,
-                    height: 0.2
-                });
-                var textMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
-                var mesh = new THREE.Mesh(textGeometry, textMaterial);
-                scene.add(mesh);
+    // Passwortüberprüfung
+    function checkPassword() {
+        var password = document.getElementById('passwordInput').value;
+        if (password === "DingoDongo2024!!!Yay") {
+            document.getElementById('passwordForm').style.display = 'none';
+            document.getElementById('greetingForm').style.display = 'block';
+        } else {
+            alert("Falsches Passwort!");
+        }
+    }
 
-                // Positionieren Sie den Namen zufällig in der Szene
-                mesh.position.x = Math.random() * 5 - 2.5;
-                mesh.position.y = Math.random() * 5 - 2.5;
-            });
-            document.getElementById('nameInput').value = ''; // Eingabefeld leeren
+    // Grußtext hinzufügen
+    function addGreeting() {
+        var greetingText = document.getElementById('greetingText').value;
+        if (greetingText) {
+            db.collection("greetings").add({
+                text: greetingText,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+                .then(function (docRef) {
+                    console.log("Grußtext gespeichert mit ID: ", docRef.id);
+                    document.getElementById('greetingText').value = ''; // Textbereich leeren
+                })
+                .catch(function (error) {
+                    console.error("Fehler beim Hinzufügen des Grußtexts: ", error);
+                });
         }
     }
 </script>
