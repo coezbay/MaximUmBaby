@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>MaximUmBaby</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #nameForm {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+        }
+    </style>
+</head>
+<body>
+<div id="nameForm">
+    <input type="text" id="nameInput" placeholder="Namen hier eingeben"/>
+    <button onclick="addName()">Namen hinzufügen</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    // Grundlegendes Three.js-Setup
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Hier können Sie einfache geometrische Formen oder Text als Willkommensbotschaft hinzufügen
+    var geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+    var material = new THREE.MeshBasicMaterial({color: 0xffff00, wireframe: true});
+    var torusKnot = new THREE.Mesh(geometry, material);
+    scene.add(torusKnot);
+
+    // Animations-Loop
+    function animate() {
+        requestAnimationFrame(animate);
+        torusKnot.rotation.x += 0.01;
+        torusKnot.rotation.y += 0.01;
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Funktion zum Hinzufügen von Namen
+    function addName() {
+        var name = document.getElementById('nameInput').value;
+        if (name) {
+            var loader = new THREE.FontLoader();
+            loader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+                var textGeometry = new THREE.TextGeometry(name, {
+                    font: font,
+                    size: 1,
+                    height: 0.2
+                });
+                var textMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
+                var mesh = new THREE.Mesh(textGeometry, textMaterial);
+                scene.add(mesh);
+
+                // Positionieren Sie den Namen zufällig in der Szene
+                mesh.position.x = Math.random() * 5 - 2.5;
+                mesh.position.y = Math.random() * 5 - 2.5;
+            });
+            document.getElementById('nameInput').value = ''; // Eingabefeld leeren
+        }
+    }
+</script>
+</body>
+</html>
