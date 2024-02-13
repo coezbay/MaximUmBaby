@@ -38,10 +38,33 @@
     document.body.appendChild(renderer.domElement);
 
     // Hier können Sie einfache geometrische Formen oder Text als Willkommensbotschaft hinzufügen
-    var geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
-    var material = new THREE.MeshBasicMaterial({color: 0xffff00, wireframe: true});
-    var torusKnot = new THREE.Mesh(geometry, material);
-    scene.add(torusKnot);
+    // Herzform-Funktion
+    function heartShape(u, v, target) {
+        u = 2 * Math.PI * u - Math.PI;
+        v = 2 * Math.PI * v - Math.PI;
+
+        var x = 16 * Math.pow(Math.sin(u), 3);
+        var y = 13 * Math.cos(u) - 5 * Math.cos(2*u) - 2 * Math.cos(3*u) - Math.cos(4*u);
+        var z = -v;
+
+        target.set(x, y, z).multiplyScalar(0.2); // Skalieren, um die Größe des Herzens anzupassen
+    }
+
+    // Parametrische Geometrie basierend auf der Herzform
+    var geometry = new THREE.ParametricGeometry(heartShape, 50, 50);
+
+    // Material
+    var material = new THREE.MeshBasicMaterial({ color: 0xFF1493, side: THREE.DoubleSide });
+
+    // Mesh erstellen
+    var heart = new THREE.Mesh(geometry, material);
+
+    // Herz rotieren, um es aufrecht zu stellen
+    heart.rotation.x = Math.PI;
+    heart.position.y = -2;
+
+    // Herz zur Szene hinzufügen
+    scene.add(heart);
 
     // Animations-Loop
     function animate() {
