@@ -2,6 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MaximUmBaby</title>
     <style>
         body {
@@ -9,7 +10,23 @@
             font-family: Arial, sans-serif;
         }
 
+        #passwordForm, #greetingForm {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        input, button, textarea {
+            width: 100%;
+            max-width: 360px;
+            box-sizing: border-box;
+            margin: 10px 0;
+        }
+
         canvas {
+            width: 100%;
+            height: auto;
             display: block;
         }
     </style>
@@ -21,7 +38,7 @@
 </div>
 
 <div id="greetingForm" style="display:none;">
-    <textarea id="greetingText" placeholder="Grußtext hier verfassen" rows="4" cols="50"></textarea>
+    <textarea id="greetingText" placeholder="Grußtext hier verfassen" rows="4"></textarea>
     <button onclick="addGreeting()">Gruß hinzufügen</button>
 </div>
 
@@ -56,7 +73,7 @@
 
         renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setClearColor(0xf0f0f0); // Setzt die Hintergrundfarbe des Canvas auf Hellgrau
+        renderer.setClearColor(0xf0f0f0);
         document.body.appendChild(renderer.domElement);
 
         const loader = new THREE.FontLoader();
@@ -66,6 +83,14 @@
 
         createHeart();
     }
+
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    window.addEventListener('resize', onWindowResize, false);
 
     function heartShape(u, v, target) {
         u = 2 * Math.PI * u - Math.PI;
@@ -91,8 +116,8 @@
 
     function animate() {
         requestAnimationFrame(animate);
-        heart.rotation.x += 0.01; // Herzrotation auf der X-Achse
-        heart.rotation.y += 0.01; // Herzrotation auf der Y-Achse
+        heart.rotation.x += 0.01;
+        heart.rotation.y += 0.01;
         renderer.render(scene, camera);
     }
 
@@ -129,10 +154,10 @@
         });
     }
 
-    let textMeshes = []; // Speichern Sie alle TextMeshes zur Kollisionsprüfung
-    let spiralStep = 0; // Schritt in der Spirale
-    let angleStep = 0.1; // Winkeländerung pro Schritt in Radianten
-    let radiusStep = 0.5; // Radiusänderung pro vollständiger Umdrehung
+    let textMeshes = [];
+    let spiralStep = 0;
+    let angleStep = 0.1;
+    let radiusStep = 0.5;
 
     function createTextMesh(text) {
         if (font) {
@@ -152,28 +177,28 @@
 
                 textMesh.position.x = radius * Math.cos(angle);
                 textMesh.position.y = radius * Math.sin(angle);
-                textMesh.position.z = 0; // Z-Position kann angepasst werden, falls nötig
+                textMesh.position.z = 0;
 
                 if (!checkCollision(textMesh)) {
                     positionFound = true;
                 } else {
-                    spiralStep++; // Gehe zum nächsten Schritt in der Spirale, wenn eine Kollision erkannt wird
+                    spiralStep++;
                 }
             }
 
             scene.add(textMesh);
-            textMeshes.push(textMesh); // Fügen Sie das Mesh zur Überprüfungsliste hinzu
-            spiralStep++; // Bereite den nächsten Schritt in der Spirale vor
+            textMeshes.push(textMesh);
+            spiralStep++;
         }
     }
 
     function checkCollision(newMesh) {
         for (let mesh of textMeshes) {
             if (isColliding(mesh, newMesh)) {
-                return true; // Kollision gefunden
+                return true;
             }
         }
-        return false; // Keine Kollision
+        return false;
     }
 
     function isColliding(mesh1, mesh2) {
